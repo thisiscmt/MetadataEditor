@@ -15,11 +15,18 @@ switch(args[0])
         Operations.RunFileCasing(args);
 
         break;
+    case "-metacasing":
+    case "-mc":
+        Operations.RunMetadataCasing(args);
+
+        break;
     case "-help":
     case "-h":
         Console.WriteLine("Metadata Editor supports the following opertions:");
         Console.WriteLine();
         Console.WriteLine(" -fc                List file names that violate casing rules for artist or song title.");
+
+        // TODO
 
         break;
     default:
