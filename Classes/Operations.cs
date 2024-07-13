@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-
-using ATL;
-using ATL.AudioData;
+﻿using ATL;
 
 namespace MetadataEditor
 {
@@ -39,7 +35,7 @@ namespace MetadataEditor
 
                 foreach (FileInfo file in files)
                 {
-                    string? result = Utils.CheckCasing(file.Name, file.Name, dir.FullName);
+                    string? result = Utils.CheckCasing(file.Name, file.Name, file.DirectoryName!);
 
                     if (result != null)
                     {
@@ -97,30 +93,32 @@ namespace MetadataEditor
 
                 foreach (FileInfo file in files)
                 {
+//                    Console.Write("\r{0}                                                                                           ", file.Name);
+
                     Track track = new Track(Path.Combine(file.DirectoryName!, file.Name));
                     string? result;
                         
-                    result = Utils.CheckCasing(track.Artist, file.Name, dir.FullName);
+                    result = Utils.CheckCasing(track.Artist, file.Name, file.DirectoryName!);
 
                     if (result != null)
                     {
-                        results.Add(result);
+                        results.Add($"{result} | {track.Artist}");
                         continue;
                     }
 
-                    result = Utils.CheckCasing(track.Title, file.Name, dir.FullName);
+                    result = Utils.CheckCasing(track.Title, file.Name, file.DirectoryName!);
 
                     if (result != null)
                     {
-                        results.Add(result);
+                        results.Add($"{result} | {track.Title}");
                         continue;
                     }
 
-                    result = Utils.CheckCasing(track.Album, file.Name, dir.FullName);
+                    result = Utils.CheckCasing(track.Album, file.Name, file.DirectoryName!);
 
                     if (result != null)
                     {
-                        results.Add(result);
+                        results.Add($"{result} | {track.Album}");
                         continue;
                     }
                 }
@@ -130,7 +128,7 @@ namespace MetadataEditor
                 if (results.Count == 0)
                 {
                     string filesChecked = files.Count.ToString("N0");
-                    Console.WriteLine($"No casing errors were found. Files checked: {formattedFilesChecked}");
+                    Console.WriteLine($"\nNo casing errors were found. Files checked: {formattedFilesChecked}");
 
                     Environment.Exit(0);
                 }
@@ -141,7 +139,7 @@ namespace MetadataEditor
                 Utils.WriteOutput(outputFilePath, results);
 
                 string formattedErrorsFound = results.Count.ToString("N0");
-                Console.WriteLine($"File \"{outputFilePath}\" created successfully. Files checked: {formattedFilesChecked}. Casing errors found: {formattedErrorsFound}");
+                Console.WriteLine($"\nFile \"{outputFilePath}\" created successfully. Files checked: {formattedFilesChecked}. Casing errors found: {formattedErrorsFound}");
             }
             catch (Exception ex)
             {

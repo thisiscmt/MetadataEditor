@@ -1,18 +1,51 @@
-﻿using System;
-
-namespace MetadataEditor
+﻿namespace MetadataEditor
 {
     internal class Utils
     {
-        public static bool FileNameContainsText(string source, string text)
+        public static bool ContainsText(string source, string text)
         {
-            string[] fileNameParts = Path.GetFileNameWithoutExtension(source).Split(" - ");
-            bool artistPartMatch = fileNameParts[0].Contains($" {text} ", StringComparison.CurrentCulture) && !fileNameParts[0].Contains($" {text} (", StringComparison.CurrentCulture) && !fileNameParts[0].Contains($") {text} ", StringComparison.CurrentCulture);
-            bool titlePartMatch = fileNameParts[1].Contains($" {text} ", StringComparison.CurrentCulture) && !fileNameParts[1].Contains($" {text} (", StringComparison.CurrentCulture) && !fileNameParts[1].Contains($") {text} ", StringComparison.CurrentCulture);
+            bool artistPartMatch = false;
+            bool titlePartMatch = false;
+            bool match = false;
 
-            return artistPartMatch || titlePartMatch;
+            if (source.Contains(" - "))
+            {
+                string[] fileNameParts = Path.GetFileNameWithoutExtension(source).Split(" - ");
+
+                artistPartMatch = fileNameParts[0].Contains($" {text} ", StringComparison.CurrentCulture) &&
+                                  !fileNameParts[0].Contains($" {text} (", StringComparison.CurrentCulture) &&
+                                  !fileNameParts[0].Contains($") {text} ", StringComparison.CurrentCulture) &&
+                                  !fileNameParts[0].Contains($": {text} ", StringComparison.CurrentCulture) &&
+                                  !fileNameParts[0].Contains($", {text} ", StringComparison.CurrentCulture) &&
+                                  !fileNameParts[0].Contains($". {text} ", StringComparison.CurrentCulture) &&
+                                  !fileNameParts[0].Contains($"/ {text} ", StringComparison.CurrentCulture) &&
+                                  !fileNameParts[0].Contains($"! {text} ", StringComparison.CurrentCulture);
+
+                titlePartMatch = fileNameParts[1].Contains($" {text} ", StringComparison.CurrentCulture) && 
+                                 !fileNameParts[1].Contains($" {text} (", StringComparison.CurrentCulture) && 
+                                 !fileNameParts[1].Contains($") {text} ", StringComparison.CurrentCulture) &&
+                                 !fileNameParts[1].Contains($": {text} ", StringComparison.CurrentCulture) &&
+                                 !fileNameParts[1].Contains($", {text} ", StringComparison.CurrentCulture) &&
+                                 !fileNameParts[1].Contains($". {text} ", StringComparison.CurrentCulture) &&
+                                 !fileNameParts[1].Contains($"/ {text} ", StringComparison.CurrentCulture) &&
+                                 !fileNameParts[1].Contains($"! {text} ", StringComparison.CurrentCulture);
+
+                return artistPartMatch || titlePartMatch;
+            }
+            else
+            {
+                match = source.Contains($" {text} ", StringComparison.CurrentCulture) && 
+                        !source.Contains($" {text} (", StringComparison.CurrentCulture) && 
+                        !source.Contains($") {text} ", StringComparison.CurrentCulture) &&
+                        !source.Contains($": {text} ", StringComparison.CurrentCulture) &&
+                        !source.Contains($", {text} ", StringComparison.CurrentCulture) &&
+                        !source.Contains($". {text} ", StringComparison.CurrentCulture) &&
+                        !source.Contains($"/ {text} ", StringComparison.CurrentCulture) &&
+                        !source.Contains($"! {text} ", StringComparison.CurrentCulture);
+
+                return match;
+            }
         }
-
 
         public static string CreateOutputDirectory(string[] args, string outputFileArg)
         {
@@ -42,10 +75,10 @@ namespace MetadataEditor
         {
             string? resultToAdd = null;
 
-            if (Utils.FileNameContainsText(valueToCheck, "A") || Utils.FileNameContainsText(valueToCheck, "And") || Utils.FileNameContainsText(valueToCheck, "As") ||
-                Utils.FileNameContainsText(valueToCheck, "At") || Utils.FileNameContainsText(valueToCheck, "For") || Utils.FileNameContainsText(valueToCheck, "In") || 
-                Utils.FileNameContainsText(valueToCheck, "Of") || Utils.FileNameContainsText(valueToCheck, "On") || Utils.FileNameContainsText(valueToCheck, "Or") || 
-                Utils.FileNameContainsText(valueToCheck, "The") || Utils.FileNameContainsText(valueToCheck, "To"))
+            if (ContainsText(valueToCheck, "A") || ContainsText(valueToCheck, "And") || ContainsText(valueToCheck, "As") ||
+                ContainsText(valueToCheck, "At") || ContainsText(valueToCheck, "For") || ContainsText(valueToCheck, "In") || 
+                ContainsText(valueToCheck, "Of") || ContainsText(valueToCheck, "On") || ContainsText(valueToCheck, "Or") || 
+                ContainsText(valueToCheck, "The") || ContainsText(valueToCheck, "To"))
             {
                 resultToAdd = Path.Combine(dirPath, fileName);
             }
