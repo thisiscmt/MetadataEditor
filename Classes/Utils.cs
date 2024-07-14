@@ -4,9 +4,9 @@
     {
         public static bool ContainsText(string source, string text)
         {
-            bool artistPartMatch = false;
-            bool titlePartMatch = false;
-            bool match = false;
+            bool artistPartMatch;
+            bool titlePartMatch;
+            bool match;
 
             if (source.Contains(" - "))
             {
@@ -30,7 +30,7 @@
                                  !fileNameParts[1].Contains($"/ {text} ", StringComparison.CurrentCulture) &&
                                  !fileNameParts[1].Contains($"! {text} ", StringComparison.CurrentCulture);
 
-                return artistPartMatch || titlePartMatch;
+                return (artistPartMatch || titlePartMatch) && !IsFourPartInOutTitle(fileNameParts[1]);
             }
             else
             {
@@ -43,11 +43,11 @@
                         !source.Contains($"/ {text} ", StringComparison.CurrentCulture) &&
                         !source.Contains($"! {text} ", StringComparison.CurrentCulture);
 
-                return match;
+                return match && !IsFourPartInOutTitle(source);
             }
         }
 
-        public static string CreateOutputDirectory(string[] args, string outputFileArg)
+        public static string CreateOutputDirectory(string outputFileArg)
         {
             string outputFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), outputFileArg);
 
@@ -62,12 +62,11 @@
 
         public static void WriteOutput(string outputFilePath, List<string> results)
         {
-            using (TextWriter outputFile = File.CreateText(outputFilePath))
+            using TextWriter outputFile = File.CreateText(outputFilePath);
+
+            foreach (string result in results)
             {
-                foreach (string result in results)
-                {
-                    outputFile.WriteLine(result);
-                }
+                outputFile.WriteLine(result);
             }
         }
 
@@ -84,6 +83,15 @@
             }
 
             return resultToAdd;
+        }
+
+        public static bool IsFourPartInOutTitle(string valueToCheck)
+        {
+            // We check for the case of a 4-part title of the form '<word> In <word> Out'. In this case we want to ignore the regular casing rules because
+            // it would look and read better with the In as a primary word. An example is 'Drive In Drive Out' by The Dave Matthews Band.
+            string[] titleParts = valueToCheck.Split(" ");
+
+            return titleParts.Length == 4 && titleParts[1] == "In" && titleParts[3] == "Out";
         }
     }
 }

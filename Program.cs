@@ -22,11 +22,14 @@ switch(args[0])
         break;
     case "-help":
     case "-h":
-        Console.WriteLine("Metadata Editor supports the following opertions:");
+        Console.WriteLine("Metadata Editor does various tasks involving music files and their metadata. Commands of are of the form:");
         Console.WriteLine();
-        Console.WriteLine(" -fc                List file names that violate casing rules for artist or song title.");
-
-        // TODO
+        Console.WriteLine("medit <task> <path to music files> <file extension> <path to output file> (optional)");
+        Console.WriteLine();
+        Console.WriteLine("Paths with spaces must be enclosed in quotes. All subdirectories within the path to the music files will be checked for the given extension. If the output file parameter is omitted, a file will be created in the Documents directory. The following tasks are supported:");
+        Console.WriteLine();
+        Console.WriteLine(" -fc     Generate a list of files whose name violates casing rules. File names are assumed to follow this standard: '<artist> - <title>'.");
+        Console.WriteLine(" -mc     Generate a list of files that have an artist, title, or album metadata value that violates casing rules.");
 
         break;
     default:

@@ -23,7 +23,7 @@ namespace MetadataEditor
                 string baseDir = args[1];
                 string extension = args[2];
                 string outputFileArg = DEFAULT_FILE_CASING_FILE_NAME;
-                List<string> results = new List<string>();
+                List<string> results = [];
 
                 if (args.Length == 4)
                 {
@@ -53,7 +53,7 @@ namespace MetadataEditor
 
                 results.Sort();
 
-                string outputFilePath = Utils.CreateOutputDirectory(args, outputFileArg);
+                string outputFilePath = Utils.CreateOutputDirectory(outputFileArg);
                 Utils.WriteOutput(outputFilePath, results);
 
                 string formattedErrorsFound = results.Count.ToString("N0");
@@ -93,8 +93,6 @@ namespace MetadataEditor
 
                 foreach (FileInfo file in files)
                 {
-//                    Console.Write("\r{0}                                                                                           ", file.Name);
-
                     Track track = new Track(Path.Combine(file.DirectoryName!, file.Name));
                     string? result;
                         
@@ -135,7 +133,7 @@ namespace MetadataEditor
 
                 results.Sort();
 
-                string outputFilePath = Utils.CreateOutputDirectory(args, outputFileArg);
+                string outputFilePath = Utils.CreateOutputDirectory(outputFileArg);
                 Utils.WriteOutput(outputFilePath, results);
 
                 string formattedErrorsFound = results.Count.ToString("N0");
