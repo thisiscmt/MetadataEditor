@@ -2,50 +2,9 @@
 {
     internal class Utils
     {
-        public static bool ContainsText(string source, string text)
-        {
-            bool artistPartMatch;
-            bool titlePartMatch;
-            bool match;
-
-            if (source.Contains(" - "))
-            {
-                string[] fileNameParts = Path.GetFileNameWithoutExtension(source).Split(" - ");
-
-                artistPartMatch = fileNameParts[0].Contains($" {text} ", StringComparison.CurrentCulture) &&
-                                  !fileNameParts[0].Contains($" {text} (", StringComparison.CurrentCulture) &&
-                                  !fileNameParts[0].Contains($") {text} ", StringComparison.CurrentCulture) &&
-                                  !fileNameParts[0].Contains($": {text} ", StringComparison.CurrentCulture) &&
-                                  !fileNameParts[0].Contains($", {text} ", StringComparison.CurrentCulture) &&
-                                  !fileNameParts[0].Contains($". {text} ", StringComparison.CurrentCulture) &&
-                                  !fileNameParts[0].Contains($"/ {text} ", StringComparison.CurrentCulture) &&
-                                  !fileNameParts[0].Contains($"! {text} ", StringComparison.CurrentCulture);
-
-                titlePartMatch = fileNameParts[1].Contains($" {text} ", StringComparison.CurrentCulture) && 
-                                 !fileNameParts[1].Contains($" {text} (", StringComparison.CurrentCulture) && 
-                                 !fileNameParts[1].Contains($") {text} ", StringComparison.CurrentCulture) &&
-                                 !fileNameParts[1].Contains($": {text} ", StringComparison.CurrentCulture) &&
-                                 !fileNameParts[1].Contains($", {text} ", StringComparison.CurrentCulture) &&
-                                 !fileNameParts[1].Contains($". {text} ", StringComparison.CurrentCulture) &&
-                                 !fileNameParts[1].Contains($"/ {text} ", StringComparison.CurrentCulture) &&
-                                 !fileNameParts[1].Contains($"! {text} ", StringComparison.CurrentCulture);
-
-                return (artistPartMatch || titlePartMatch) && !IsFourPartInOutTitle(fileNameParts[1]);
-            }
-            else
-            {
-                match = source.Contains($" {text} ", StringComparison.CurrentCulture) && 
-                        !source.Contains($" {text} (", StringComparison.CurrentCulture) && 
-                        !source.Contains($") {text} ", StringComparison.CurrentCulture) &&
-                        !source.Contains($": {text} ", StringComparison.CurrentCulture) &&
-                        !source.Contains($", {text} ", StringComparison.CurrentCulture) &&
-                        !source.Contains($". {text} ", StringComparison.CurrentCulture) &&
-                        !source.Contains($"/ {text} ", StringComparison.CurrentCulture) &&
-                        !source.Contains($"! {text} ", StringComparison.CurrentCulture);
-
-                return match && !IsFourPartInOutTitle(source);
-            }
-        }
+        // These values are special cases that should never be flagged as being wrong. They are here to avoid adding a bunch of custom logic for one-offs
+        // and to get an accurate result for each operation.
+        private const string CUSTOM_CASE_1 = "OK Alright A Huh Oh Yeah";
 
         public static string CreateOutputDirectory(string outputFileArg)
         {
@@ -73,19 +32,51 @@
         public static string? CheckCasing(string valueToCheck, string fileName, string dirPath)
         {
             string? resultToAdd = null;
+            string[] wordsToCheck = ["A", "And", "As", "At", "For", "In", "Of", "On", "Or", "The", "To"];
 
-            if (ContainsText(valueToCheck, "A") || ContainsText(valueToCheck, "And") || ContainsText(valueToCheck, "As") ||
-                ContainsText(valueToCheck, "At") || ContainsText(valueToCheck, "For") || ContainsText(valueToCheck, "In") || 
-                ContainsText(valueToCheck, "Of") || ContainsText(valueToCheck, "On") || ContainsText(valueToCheck, "Or") || 
-                ContainsText(valueToCheck, "The") || ContainsText(valueToCheck, "To"))
+            foreach (string word in wordsToCheck)
             {
-                resultToAdd = Path.Combine(dirPath, fileName);
+                if (ContainsWord(valueToCheck, word))
+                {
+                    resultToAdd = Path.Combine(dirPath, fileName);
+                }
             }
 
             return resultToAdd;
         }
 
-        public static bool IsFourPartInOutTitle(string valueToCheck)
+        private static bool ContainsWord(string source, string word)
+        {
+            bool artistPartMatch;
+            bool titlePartMatch;
+            bool match;
+
+            if (source.Contains(" - "))
+            {
+                string[] fileNameParts = Path.GetFileNameWithoutExtension(source).Split(" - ");
+
+                artistPartMatch = ContainsText(fileNameParts[0], word);
+                titlePartMatch = ContainsText(fileNameParts[1], word);
+
+                return (artistPartMatch || titlePartMatch) && !IsFourPartInOutTitle(fileNameParts[1]) && fileNameParts[1] != CUSTOM_CASE_1;
+            }
+            else
+            {
+                match = ContainsText(source, word);
+
+                return match && !IsFourPartInOutTitle(source) && source != CUSTOM_CASE_1;
+            }
+        }
+
+        private static bool ContainsText(string source, string text)
+        {
+            return source.Contains($" {text} ", StringComparison.CurrentCulture) && !source.Contains($" {text} (", StringComparison.CurrentCulture) &&
+                   !source.Contains($") {text} ", StringComparison.CurrentCulture) && !source.Contains($": {text} ", StringComparison.CurrentCulture) &&
+                   !source.Contains($", {text} ", StringComparison.CurrentCulture) && !source.Contains($". {text} ", StringComparison.CurrentCulture) &&
+                   !source.Contains($"/ {text} ", StringComparison.CurrentCulture) && !source.Contains($"! {text} ", StringComparison.CurrentCulture);
+        }
+
+        private static bool IsFourPartInOutTitle(string valueToCheck)
         {
             // We check for the case of a 4-part title of the form '<word> In <word> Out'. In this case we want to ignore the regular casing rules because
             // it would look and read better with the In as a primary word. An example is 'Drive In Drive Out' by The Dave Matthews Band.
