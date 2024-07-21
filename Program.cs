@@ -20,6 +20,11 @@ switch(args[0])
         Operations.RunSearch(args);
 
         break;
+    case "-field":
+    case "-f":
+        Operations.RunFieldCheck(args);
+
+        break;
     case "-help":
     case "-h":
         Console.WriteLine("Metadata Editor does various tasks involving music files and their metadata");
