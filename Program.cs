@@ -10,26 +10,27 @@ if (args.Length == 0)
 
 switch(args[0])
 {
-    case "-filecasing":
-    case "-fc":
-        Operations.RunFileCasing(args);
+    case "-casing":
+    case "-c":
+        Operations.RunCasing(args);
 
         break;
-    case "-metacasing":
-    case "-mc":
-        Operations.RunMetadataCasing(args);
+    case "-search":
+    case "-s":
+        Operations.RunSearch(args);
 
         break;
     case "-help":
     case "-h":
-        Console.WriteLine("Metadata Editor does various tasks involving music files and their metadata. Commands of are of the form:");
+        Console.WriteLine("Metadata Editor does various tasks involving music files and their metadata");
         Console.WriteLine();
-        Console.WriteLine("medit <task> <path to music files> <file extension> <path to output file> (optional)");
+        Console.WriteLine("Paths with spaces must be enclosed in quotes. All subdirectories within the path to the music files will be checked for the given extension. The extension parameter should not include a dot. File names are assumed to follow this standard: '<artist> - <title>'. If the output file parameter is omitted, a file will be created in the Documents directory. The following tasks are supported:");
         Console.WriteLine();
-        Console.WriteLine("Paths with spaces must be enclosed in quotes. All subdirectories within the path to the music files will be checked for the given extension. If the output file parameter is omitted, a file will be created in the Documents directory. The following tasks are supported:");
+        Console.WriteLine("Generate a list of files whose name or artist/title/album metadata value violates casing rules.");
+        Console.WriteLine("  -c [path to files] [extension] [path to output file (optional)]");
         Console.WriteLine();
-        Console.WriteLine(" -fc     Generate a list of files whose name violates casing rules. File names are assumed to follow this standard: '<artist> - <title>'.");
-        Console.WriteLine(" -mc     Generate a list of files that have an artist, title, or album metadata value that violates casing rules.");
+        Console.WriteLine("Generate a list of files whose name or artist/title/album metadata value contains the given text.");
+        Console.WriteLine("  -s [path to files] [extension] [search text] [path to output file (optional)]");
 
         break;
     default:
