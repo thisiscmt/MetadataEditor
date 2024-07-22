@@ -42,7 +42,7 @@ switch(args[0])
         Console.WriteLine("Generate a list of files whose name or artist/title/album/album artist metadata value contains the given text (case-sensitive).");
         Console.WriteLine("  -s [path to files] [extension] [search text] [path to output file (optional)]");
         Console.WriteLine();
-        Console.WriteLine("Generate a list of files with a metadata value for artist/title/album/album artist value that is either empty or non-empty.");
+        Console.WriteLine("Generate a list of files with a metadata value for artist/title/album/album artist/date/genre that is either empty or non-empty.");
         Console.WriteLine("  -f [path to files] [extension] [field name] ['empty' | 'nonempty'] [path to output file (optional)]");
         Console.WriteLine();
         Console.WriteLine("Generate a list of files whose name or artist/title/album/album artist metadata value has a '(' followed by a lower-case letter.");

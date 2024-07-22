@@ -9,7 +9,6 @@ namespace MetadataEditor
 
         public static void RunCasingCheck(string[] args)
         {
-
             if (args.Length < 3)
             {
                 Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
