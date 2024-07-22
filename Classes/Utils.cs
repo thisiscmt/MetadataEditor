@@ -1,11 +1,16 @@
-﻿namespace MetadataEditor
+﻿using System.Text;
+
+namespace MetadataEditor
 {
     internal class Utils
     {
+        #region Private fields
         // These values are special cases that should never be flagged as being wrong. They are here to avoid adding a bunch of custom logic for one-offs
         // and to get an accurate result for each operation.
         private const string CUSTOM_CASE_1 = "OK Alright A Huh Oh Yeah";
+        #endregion
 
+        #region Public static methods
         public static string CreateOutputDirectory(string outputFileArg)
         {
             string outputFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), outputFileArg);
@@ -45,6 +50,30 @@
             return resultToAdd;
         }
 
+        public static string? CheckForLowerCaseAfterParen(string valueTocheck, string fileName, string dirPath)
+        {
+            string? resultToAdd = null;
+
+            if (valueTocheck.Contains('('))
+            {
+                int index = valueTocheck.IndexOf('(');
+
+                if (valueTocheck.Substring(index + 1, 2) != "of")
+                {
+                    byte[] asciiValue = Encoding.ASCII.GetBytes([valueTocheck[index + 1]]);
+
+                    if (asciiValue[0] >= 97 && asciiValue[0] <= 122)
+                    {
+                        resultToAdd = Path.Combine(dirPath, fileName);
+                    }
+                }
+            }
+
+            return resultToAdd;
+        }
+        #endregion
+
+        #region Private static methods
         private static bool ContainsWord(string source, string word)
         {
             bool artistPartMatch;
@@ -85,4 +114,5 @@
             return titleParts.Length == 4 && titleParts[1] == "In" && titleParts[3] == "Out";
         }
     }
+    #endregion
 }

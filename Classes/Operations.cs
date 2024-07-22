@@ -5,17 +5,14 @@ namespace MetadataEditor
 {
     internal class Operations
     {
-        private const string DEFAULT_CASING_RESULTS_FILE = "Casing errors.txt";
-        private const string DEFAULT_SEARCH_RESULTS_FILE = "Search results.txt";
-        private const string DEFAULT_FIELD_CHECK_RESULTS_FILE = "Field check results.txt";
+        private const string DEFAULT_RESULTS_FILE = "Metadata Editor results.txt";
 
-        public static void RunCasing(string[] args)
+        public static void RunCasingCheck(string[] args)
         {
 
             if (args.Length < 3)
             {
                 Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
-                Environment.Exit(0);
 
                 return;
             }
@@ -24,7 +21,8 @@ namespace MetadataEditor
             {
                 string baseDir = args[1];
                 string extension = args[2];
-                string outputFileArg = DEFAULT_CASING_RESULTS_FILE;
+                string outputFileArg = DEFAULT_RESULTS_FILE;
+                string? result;
                 var results = new List<string>();
 
                 if (args.Length == 4)
@@ -37,7 +35,6 @@ namespace MetadataEditor
 
                 foreach (FileInfo file in files)
                 {
-                    string? result;
                     result = Utils.CheckCasing(file.Name, file.Name, file.DirectoryName!);
 
                     if (result != null)
@@ -87,7 +84,7 @@ namespace MetadataEditor
                     string filesChecked = files.Count.ToString("N0");
                     Console.WriteLine($"\nNo casing errors were found. Files checked: {formattedFilesChecked}");
 
-                    Environment.Exit(0);
+                    return;
                 }
 
                 results.Sort();
@@ -109,7 +106,6 @@ namespace MetadataEditor
             if (args.Length < 4)
             {
                 Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
-                Environment.Exit(0);
 
                 return;
             }
@@ -119,7 +115,7 @@ namespace MetadataEditor
                 string baseDir = args[1];
                 string extension = args[2];
                 string searchText = args[3];
-                string outputFileArg = DEFAULT_SEARCH_RESULTS_FILE;
+                string outputFileArg = DEFAULT_RESULTS_FILE;
                 var results = new List<string>();
 
                 if (args.Length == 5)
@@ -171,7 +167,7 @@ namespace MetadataEditor
                     string filesChecked = files.Count.ToString("N0");
                     Console.WriteLine($"\nNo results were found. Files checked: {formattedFilesChecked}");
 
-                    Environment.Exit(0);
+                    return;
                 }
 
                 results.Sort();
@@ -193,7 +189,6 @@ namespace MetadataEditor
             if (args.Length < 6)
             {
                 Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
-                Environment.Exit(0);
 
                 return;
             }
@@ -204,7 +199,7 @@ namespace MetadataEditor
                 string extension = args[2];
                 string fieldName = args[3].ToLower();
                 string checkToPerform = args[4];
-                string outputFileArg = DEFAULT_FIELD_CHECK_RESULTS_FILE;
+                string outputFileArg = DEFAULT_RESULTS_FILE;
                 var results = new List<string>();
 
                 if (args.Length == 6)
@@ -281,7 +276,101 @@ namespace MetadataEditor
                     string filesChecked = files.Count.ToString("N0");
                     Console.WriteLine($"\nNo results were found. Files checked: {formattedFilesChecked}");
 
-                    Environment.Exit(0);
+                    return;
+                }
+
+                results.Sort();
+
+                string outputFilePath = Utils.CreateOutputDirectory(outputFileArg);
+                Utils.WriteOutput(outputFilePath, results);
+
+                string formattedErrorsFound = results.Count.ToString("N0");
+                Console.WriteLine($"\nFile \"{outputFilePath}\" created successfully. Files checked: {formattedFilesChecked}. Results found: {formattedErrorsFound}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+
+        public static void RunParensCheck(string[] args)
+        {
+            if (args.Length < 3)
+            {
+                Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
+
+                return;
+            }
+
+            try
+            {
+                string baseDir = args[1];
+                string extension = args[2];
+                string outputFileArg = DEFAULT_RESULTS_FILE;
+                string? result;
+                var results = new List<string>();
+
+                if (args.Length == 4)
+                {
+                    outputFileArg = args[3];
+                }
+
+                DirectoryInfo dir = new DirectoryInfo(baseDir);
+                var files = dir.EnumerateFiles($"*.{extension}", SearchOption.AllDirectories).ToList();
+
+                foreach (FileInfo file in files)
+                {
+                    result = Utils.CheckForLowerCaseAfterParen(file.Name, file.Name, file.DirectoryName!);
+
+                    if (result != null)
+                    {
+                        results.Add(result);
+                        continue;
+                    }
+
+                    Track track = new Track(Path.Combine(file.DirectoryName!, file.Name));
+
+                    result = Utils.CheckForLowerCaseAfterParen(track.Artist, file.Name, file.DirectoryName!);
+
+                    if (result != null)
+                    {
+                        results.Add($"{result} | {track.Artist}");
+                        continue;
+                    }
+
+                    result = Utils.CheckForLowerCaseAfterParen(track.Title, file.Name, file.DirectoryName!);
+
+                    if (result != null)
+                    {
+                        results.Add($"{result} | {track.Title}");
+                        continue;
+                    }
+
+                    result = Utils.CheckForLowerCaseAfterParen(track.Album, file.Name, file.DirectoryName!);
+
+                    if (result != null)
+                    {
+                        results.Add($"{result} | {track.Album}");
+                        continue;
+                    }
+
+                    result = Utils.CheckForLowerCaseAfterParen(track.AlbumArtist, file.Name, file.DirectoryName!);
+
+                    if (result != null)
+                    {
+                        results.Add($"{result} | {track.AlbumArtist}");
+                        continue;
+                    }
+                }
+
+                string formattedFilesChecked = files.Count.ToString("N0");
+
+                if (results.Count == 0)
+                {
+                    string filesChecked = files.Count.ToString("N0");
+                    Console.WriteLine($"\nNo results were found. Files checked: {formattedFilesChecked}");
+
+                    return;
                 }
 
                 results.Sort();

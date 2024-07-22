@@ -12,7 +12,7 @@ switch(args[0])
 {
     case "-casing":
     case "-c":
-        Operations.RunCasing(args);
+        Operations.RunCasingCheck(args);
 
         break;
     case "-search":
@@ -25,6 +25,11 @@ switch(args[0])
         Operations.RunFieldCheck(args);
 
         break;
+    case "-parens":
+    case "-p":
+        Operations.RunParensCheck(args);
+
+        break;
     case "-help":
     case "-h":
         Console.WriteLine("Metadata Editor does various tasks involving music files and their metadata.");
@@ -34,11 +39,14 @@ switch(args[0])
         Console.WriteLine("Generate a list of files whose name or artist/title/album/album artist metadata value violates casing rules.");
         Console.WriteLine("  -c [path to files] [extension] [path to output file (optional)]");
         Console.WriteLine();
-        Console.WriteLine("Generate a list of files whose name or artist/title/album/album artist metadata value contains the given text.");
+        Console.WriteLine("Generate a list of files whose name or artist/title/album/album artist metadata value contains the given text (case-sensitive).");
         Console.WriteLine("  -s [path to files] [extension] [search text] [path to output file (optional)]");
         Console.WriteLine();
         Console.WriteLine("Generate a list of files with a metadata value for artist/title/album/album artist value that is either empty or non-empty.");
         Console.WriteLine("  -f [path to files] [extension] [field name] ['empty' | 'nonempty'] [path to output file (optional)]");
+        Console.WriteLine();
+        Console.WriteLine("Generate a list of files whose name or artist/title/album/album artist metadata value has a '(' followed by a lower-case letter.");
+        Console.WriteLine("  -p [path to files] [extension] [path to output file (optional)]");
 
         break;
     default:
