@@ -222,35 +222,52 @@ namespace MetadataEditor
                     switch (fieldName)
                     {
                         case "artist":
-                            if ((checkToPerform == "empty" && track.Artist == null) || (checkToPerform == "nonempty" && track.Artist != null))
+                            if ((checkToPerform == "empty" && track.Artist == "") || (checkToPerform == "nonempty" && track.Artist != ""))
                             {
                                 results.Add(file.FullName);
                             }
 
                             break;
                         case "title":
+                            if ((checkToPerform == "empty" && track.Title == "") || (checkToPerform == "nonempty" && track.Title != ""))
+                            {
+                                results.Add(file.FullName);
+                            }
+
                             break;
                         case "album":
+                            if ((checkToPerform == "empty" && track.Album == "") || (checkToPerform == "nonempty" && track.Album != ""))
+                            {
+                                results.Add(file.FullName);
+                            }
+
                             break;
                         case "albumartist":
+                            if ((checkToPerform == "empty" && track.AlbumArtist == "") || (checkToPerform == "nonempty" && track.AlbumArtist != ""))
+                            {
+                                results.Add(file.FullName);
+                            }
+
                             break;
                         case "date":
-                            //if (track.Title == "Mystery Achievement")
-                            //{
-                            //    string cmt = "";
-                            //}
-
                             if ((checkToPerform == "empty" && (!track.Date.HasValue || (track.Date.HasValue && track.Date.Value.ToShortDateString() == "1/1/0001")) || 
                                 (checkToPerform == "nonempty" && track.Date.HasValue && track.Date.Value.ToShortDateString() != "1/1/0001")))
                             {
-                                results.Add(file.FullName);
+                                if (track.Date.HasValue)
+                                {
+                                    results.Add($"{file.FullName} | {track.Date.Value.ToLongDateString()}");
+                                }
+                                else
+                                {
+                                    results.Add(file.FullName);
+                                }
                             }
 
                             break;
                         case "genre":
                             if ((checkToPerform == "empty" && track.Genre == "") || (checkToPerform == "nonempty" && track.Genre != ""))
                             {
-                                results.Add(file.FullName);
+                                results.Add($"{file.FullName} | {track.Genre}");
                             }
 
                             break;
