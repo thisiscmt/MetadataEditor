@@ -8,6 +8,8 @@ namespace MetadataEditor
         // These values are special cases that should never be flagged as being wrong. They are here to avoid adding a bunch of custom logic for one-offs
         // and to get an accurate result for each operation.
         private const string CUSTOM_CASE_1 = "OK Alright A Huh Oh Yeah";
+
+        private static string[] m_lowerCaseWords = ["A", "And", "As", "At", "For", "In", "Of", "On", "Or", "The", "To"];
         #endregion
 
         #region Public static methods
@@ -37,9 +39,8 @@ namespace MetadataEditor
         public static string? CheckCasing(string valueToCheck, string fileName, string dirPath)
         {
             string? resultToAdd = null;
-            string[] wordsToCheck = ["A", "And", "As", "At", "For", "In", "Of", "On", "Or", "The", "To"];
 
-            foreach (string word in wordsToCheck)
+            foreach (string word in Utils.m_lowerCaseWords)
             {
                 if (ContainsWord(valueToCheck, word))
                 {
@@ -57,8 +58,9 @@ namespace MetadataEditor
             if (valueTocheck.Contains('('))
             {
                 int index = valueTocheck.IndexOf('(');
+                string wordAfterParensToCheck = valueTocheck.Substring(index + 1, 3).ToLower().Trim();
 
-                if (valueTocheck.Substring(index + 1, 2) != "of")
+                if (!Utils.m_lowerCaseWords.Any(x => x.ToLower() == wordAfterParensToCheck))
                 {
                     byte[] asciiValue = Encoding.ASCII.GetBytes([valueTocheck[index + 1]]);
 

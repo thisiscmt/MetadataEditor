@@ -45,7 +45,7 @@ switch(args[0])
         Console.WriteLine("Generate a list of files with a metadata value for artist/title/album/album artist/date/genre that is either empty or non-empty.");
         Console.WriteLine("  -f [path to files] [extension] [field name] ['empty' | 'nonempty'] [path to output file (optional)]");
         Console.WriteLine();
-        Console.WriteLine("Generate a list of files whose name or artist/title/album/album artist metadata value has a '(' followed by a lower-case letter.");
+        Console.WriteLine("Generate a list of files whose name or artist/title/album/album artist metadata value has a '(' followed by a lower-case word that is not allowed.");
         Console.WriteLine("  -p [path to files] [extension] [path to output file (optional)]");
 
         break;
