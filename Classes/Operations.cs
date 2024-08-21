@@ -157,6 +157,16 @@ namespace MetadataEditor
                     {
                         results.Add($"{file.FullName} | {track.Album}");
                     }
+
+                    if (track.TrackNumber.ToString() == searchText)
+                    {
+                        results.Add($"{file.FullName} | {track.TrackNumber}");
+                    }
+
+                    if (track.DiscNumber.ToString() == searchText)
+                    {
+                        results.Add($"{file.FullName} | {track.DiscNumber}");
+                    }
                 }
 
                 string formattedFilesChecked = files.Count.ToString("N0");
