@@ -158,12 +158,12 @@ namespace MetadataEditor
                         results.Add($"{file.FullName} | {track.Album}");
                     }
 
-                    if (track.TrackNumber.ToString() == searchText)
+                    if (track.TrackNumber.ToString()!.Contains(searchText))
                     {
                         results.Add($"{file.FullName} | {track.TrackNumber}");
                     }
 
-                    if (track.DiscNumber.ToString() == searchText)
+                    if (track.DiscNumber.ToString()!.Contains(searchText))
                     {
                         results.Add($"{file.FullName} | {track.DiscNumber}");
                     }
