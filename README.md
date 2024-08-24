@@ -11,6 +11,10 @@ It can perform various operations on a directory of music files, such as:
 - Search for files with a specific metadata attribute that is empty or non-empty.
 - Search for file names or metadata attrbutes that have an open parentheses followed by a lower-case letter.
 
-Currently it only checks the artist, title, album, and album artist metadata values. You pass it the extension of the files to check, such as 'flac' or 'mp3', 
+Currently it only checks a particular set of metadata fields for most operations, namely artist, title, album, and album artist. It also checks the track number and disc number for a search. You pass it the extension of the files to check, such as 'flac' or 'mp3', 
 and the path to the output file that contains the results of the operation. That file will include the full path of all files that need attention, plus the 
 erroneous metadata value if applicable.
+
+It uses the [Audio Tools Library](https://github.com/Zeugma440/atldotnet) for accessing metadata in music files.
+
+The roadmap includes an operation for automatically generating M3U playlists based on the files in a directory, using the title, artist, and track number in each file.

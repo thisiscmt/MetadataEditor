@@ -25,9 +25,14 @@ switch(args[0])
         Operations.RunFieldCheck(args);
 
         break;
-    case "-parens":
-    case "-p":
+    case "-casingparens":
+    case "-cp":
         Operations.RunParensCheck(args);
+
+        break;
+    case "-playlist":
+    case "-p":
+        Operations.RunPlaylistGeneration(args);
 
         break;
     case "-help":
@@ -46,7 +51,10 @@ switch(args[0])
         Console.WriteLine("  -f [path to files] [extension] [field name] ['empty' | 'nonempty'] [path to output file (optional)]");
         Console.WriteLine();
         Console.WriteLine("Generate a list of files whose name or artist/title/album/album artist metadata value has a '(' followed by a lower-case word that is not allowed.");
-        Console.WriteLine("  -p [path to files] [extension] [path to output file (optional)]");
+        Console.WriteLine("  -cp [path to files] [extension] [path to output file (optional)]");
+        Console.WriteLine();
+        Console.WriteLine("Generate playlists in all sub-directories in a parent directory based on track number.");
+        Console.WriteLine("  -p [path to directory] [extension]");
 
         break;
     default:

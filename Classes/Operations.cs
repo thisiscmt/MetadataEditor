@@ -1,4 +1,5 @@
 ﻿using ATL;
+using System.Collections.Immutable;
 using System.Text;
 
 namespace MetadataEditor
@@ -12,7 +13,6 @@ namespace MetadataEditor
             if (args.Length < 3)
             {
                 Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
-
                 return;
             }
 
@@ -76,23 +76,7 @@ namespace MetadataEditor
                     }
                 }
 
-                string formattedFilesChecked = files.Count.ToString("N0");
-
-                if (results.Count == 0)
-                {
-                    string filesChecked = files.Count.ToString("N0");
-                    Console.WriteLine($"\nNo casing errors were found. Files checked: {formattedFilesChecked}");
-
-                    return;
-                }
-
-                results.Sort();
-
-                string outputFilePath = Utils.CreateOutputDirectory(outputFileArg);
-                Utils.WriteOutput(outputFilePath, results);
-
-                string formattedErrorsFound = results.Count.ToString("N0");
-                Console.WriteLine($"\nFile \"{outputFilePath}\" created successfully. Files checked: {formattedFilesChecked}. Casing errors found: {formattedErrorsFound}");
+                Utils.ProcessResults(files, results, outputFileArg);
             }
             catch (Exception ex)
             {
@@ -105,7 +89,6 @@ namespace MetadataEditor
             if (args.Length < 4)
             {
                 Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
-
                 return;
             }
 
@@ -169,23 +152,7 @@ namespace MetadataEditor
                     }
                 }
 
-                string formattedFilesChecked = files.Count.ToString("N0");
-
-                if (results.Count == 0)
-                {
-                    string filesChecked = files.Count.ToString("N0");
-                    Console.WriteLine($"\nNo results were found. Files checked: {formattedFilesChecked}");
-
-                    return;
-                }
-
-                results.Sort();
-
-                string outputFilePath = Utils.CreateOutputDirectory(outputFileArg);
-                Utils.WriteOutput(outputFilePath, results);
-
-                string formattedErrorsFound = results.Count.ToString("N0");
-                Console.WriteLine($"\nFile \"{outputFilePath}\" created successfully. Files checked: {formattedFilesChecked}. Results found: {formattedErrorsFound}");
+                Utils.ProcessResults(files, results, outputFileArg);
             }
             catch (Exception ex)
             {
@@ -198,7 +165,6 @@ namespace MetadataEditor
             if (args.Length < 6)
             {
                 Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
-
                 return;
             }
 
@@ -254,7 +220,7 @@ namespace MetadataEditor
 
                             break;
                         case "date":
-                            if ((checkToPerform == "empty" && (!track.Date.HasValue || (track.Date.HasValue && track.Date.Value.ToShortDateString() == "1/1/0001")) || 
+                            if ((checkToPerform == "empty" && (!track.Date.HasValue || (track.Date.HasValue && track.Date.Value.ToShortDateString() == "1/1/0001")) ||
                                 (checkToPerform == "nonempty" && track.Date.HasValue && track.Date.Value.ToShortDateString() != "1/1/0001")))
                             {
                                 if (track.Date.HasValue)
@@ -278,23 +244,7 @@ namespace MetadataEditor
                     }
                 }
 
-                string formattedFilesChecked = files.Count.ToString("N0");
-
-                if (results.Count == 0)
-                {
-                    string filesChecked = files.Count.ToString("N0");
-                    Console.WriteLine($"\nNo results were found. Files checked: {formattedFilesChecked}");
-
-                    return;
-                }
-
-                results.Sort();
-
-                string outputFilePath = Utils.CreateOutputDirectory(outputFileArg);
-                Utils.WriteOutput(outputFilePath, results);
-
-                string formattedErrorsFound = results.Count.ToString("N0");
-                Console.WriteLine($"\nFile \"{outputFilePath}\" created successfully. Files checked: {formattedFilesChecked}. Results found: {formattedErrorsFound}");
+                Utils.ProcessResults(files, results, outputFileArg);
             }
             catch (Exception ex)
             {
@@ -307,7 +257,6 @@ namespace MetadataEditor
             if (args.Length < 3)
             {
                 Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
-
                 return;
             }
 
@@ -372,28 +321,83 @@ namespace MetadataEditor
                     }
                 }
 
-                string formattedFilesChecked = files.Count.ToString("N0");
-
-                if (results.Count == 0)
-                {
-                    string filesChecked = files.Count.ToString("N0");
-                    Console.WriteLine($"\nNo results were found. Files checked: {formattedFilesChecked}");
-
-                    return;
-                }
-
-                results.Sort();
-
-                string outputFilePath = Utils.CreateOutputDirectory(outputFileArg);
-                Utils.WriteOutput(outputFilePath, results);
-
-                string formattedErrorsFound = results.Count.ToString("N0");
-                Console.WriteLine($"\nFile \"{outputFilePath}\" created successfully. Files checked: {formattedFilesChecked}. Results found: {formattedErrorsFound}");
+                Utils.ProcessResults(files, results, outputFileArg);
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
             }
+        }
+
+        public static void RunPlaylistGeneration(string[] args)
+        {
+            if (args.Length < 3)
+            {
+                Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
+                return;
+            }
+
+            try
+            {
+                string baseDirPath = args[1];
+                string extension = args[2];
+                string fullExtension = $"*.{extension}";
+                int playlistCount = 0;
+
+                DirectoryInfo baseDir = new DirectoryInfo(baseDirPath);
+                BuildPlaylistFromDirectory(baseDir, fullExtension, ref playlistCount);
+
+                Console.WriteLine($"\nPlaylists created: {playlistCount:N0}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+
+        public static void BuildPlaylistFromDirectory(DirectoryInfo baseDir, string fullExtension, ref int playlistCount)
+        {
+            var dirs = baseDir.EnumerateDirectories();
+
+            foreach (DirectoryInfo dir in dirs)
+            {
+                BuildPlaylistFromDirectory(dir, fullExtension, ref playlistCount);
+            }
+
+            BuildPlaylist(baseDir, fullExtension, ref playlistCount);
+        }
+
+        public static void BuildPlaylist(DirectoryInfo dir, string fullExtension, ref int playlistCount)
+        {
+            var playlistFiles = dir.EnumerateFiles("*.m3u");
+
+            if (playlistFiles.Count() > 0)
+            {
+                return;
+            }
+
+            var files = dir.EnumerateFiles(fullExtension).OrderBy(x => new Track(x.FullName).TrackNumber);
+
+            if (files.Count() == 0)
+            {
+                return;
+            }
+
+            string playlistFilePath = Path.Combine(dir.FullName, $"{dir.Name}.m3u");
+
+            using TextWriter playlistFile = File.CreateText(playlistFilePath);
+            playlistFile.WriteLine("#EXTM3U");
+
+            foreach (FileInfo file in files)
+            {
+                Track track = new Track(file.FullName);
+                string infEntry = $"#EXTINF:{track.Duration},{Path.GetFileNameWithoutExtension(file.Name)}";
+
+                playlistFile.WriteLine(infEntry);
+                playlistFile.WriteLine(file.Name);
+            }
+
+            playlistCount++;
         }
     }
 }

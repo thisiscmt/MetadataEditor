@@ -26,6 +26,31 @@ namespace MetadataEditor
             return outputFilePath;
         }
 
+        public static void ProcessResults(List<FileInfo> files, List<string> results, string outputFileArg)
+        {
+            string formattedFilesChecked = files.Count.ToString("N0");
+
+            if (results.Count == 0)
+            {
+                string filesChecked = files.Count.ToString("N0");
+                Console.WriteLine($"\nNo errors were found. Files checked: {formattedFilesChecked}");
+
+                return;
+            }
+
+            results.Sort();
+
+            string outputFilePath = Utils.CreateOutputDirectory(outputFileArg);
+            using TextWriter outputFile = File.CreateText(outputFilePath);
+
+            foreach (string result in results)
+            {
+                outputFile.WriteLine(result);
+            }
+
+            Console.WriteLine($"\nFile \"{outputFilePath}\" created successfully. Files checked: {formattedFilesChecked}. Results found: {results.Count:N0}");
+        }
+
         public static void WriteOutput(string outputFilePath, List<string> results)
         {
             using TextWriter outputFile = File.CreateText(outputFilePath);
