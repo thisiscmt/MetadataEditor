@@ -1,6 +1,6 @@
 Metadata Editor
 ===============
-This is a CLI for managing metadata for digital music files. I had recently re-ripped my entire CD collection to lossless files and to higher-quality MP3 files. As
+This is a CLI to help manage metadata for digital music files. I had recently re-ripped my entire CD collection to lossless files and to higher-quality MP3 files. As
 part of that I wanted to enforce some naming rules for artists, songs, and albums. I tried to make sure all new files followed them but with almost 7,000 tracks, 
 some were bound to get missed. Hence this utility to find any issues so I can correct them. I wanted the new collection to be as consistent as possible.
 
