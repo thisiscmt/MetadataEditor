@@ -35,6 +35,16 @@ switch(args[0])
         Operations.RunPlaylistGeneration(args);
 
         break;
+    case "-singlequote":
+    case "-sq":
+        Operations.RunSingleQuoteCheck(args);
+
+        break;
+    case "-date":
+    case "-d":
+        Operations.RunDateMetadataFieldCheck(args);
+
+        break;
     case "-help":
     case "-h":
         Console.WriteLine("Metadata Editor does various tasks involving music files and their metadata.");
@@ -55,6 +65,12 @@ switch(args[0])
         Console.WriteLine();
         Console.WriteLine("Generate playlists in all sub-directories in a parent directory based on track number.");
         Console.WriteLine("  -p [path to directory] [extension]");
+        Console.WriteLine();
+        Console.WriteLine("Check for smart right quote characters and replace them with straight quote characters.");
+        Console.WriteLine("  -sq [path to directory] [extension] [path to output file (optional)]");
+        Console.WriteLine();
+        Console.WriteLine("Convert the Date metadata field from a 3-part date value to a 4-digit year value.");
+        Console.WriteLine("  -d [path to directory] [extension] [path to output file (optional)]");
 
         break;
     default:
