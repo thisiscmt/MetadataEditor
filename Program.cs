@@ -69,7 +69,7 @@ switch(args[0])
         Console.WriteLine("Check for smart right quote characters and replace them with straight quote characters.");
         Console.WriteLine("  -sq [path to directory] [extension] [path to output file (optional)]");
         Console.WriteLine();
-        Console.WriteLine("Convert the Date metadata field from a 3-part date value to a 4-digit year value.");
+        Console.WriteLine("Convert the Date metadata field from a 3-part date value to a 4-digit year value, if present.");
         Console.WriteLine("  -d [path to directory] [extension] [path to output file (optional)]");
 
         break;

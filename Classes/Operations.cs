@@ -465,8 +465,6 @@ namespace MetadataEditor
                 string extension = args[2];
                 string fullExtension = $"*.{extension}";
                 string outputFileArg = DEFAULT_RESULTS_FILE;
-                bool fileRenamed = false;
-                bool metadataChanged = false;
                 var results = new List<string>();
                 int correctedFileCount = 0;
 
@@ -477,66 +475,23 @@ namespace MetadataEditor
 
                 DirectoryInfo dir = new DirectoryInfo(baseDirPath);
                 Track track;
-                string fileName;
-                char rightSmartQuote = '\u2019';
-                char rightStraightQuote = '\'';
                 var files = dir.EnumerateFiles($"*.{extension}", SearchOption.AllDirectories).ToList();
 
-                //foreach (FileInfo file in files)
-                //{
-                //    if (file.Name.IndexOf(rightSmartQuote) > -1)
-                //    {
-                //        fileName = file.Name.Replace(rightSmartQuote, rightStraightQuote);
-                //        File.Move(file.FullName, Path.Combine(file.DirectoryName!, fileName));
-                //        fileRenamed = true;
-                //    }
-                //    else
-                //    {
-                //        fileName = file.Name;
-                //    }
+                foreach (FileInfo file in files)
+                {
+                    track = new Track(file.FullName);
 
-                //    track = new Track(Path.Combine(file.DirectoryName!, fileName));
+                    if (track.Date != null)
+                    {
+                        track.Year = track.Date.Value.Year;
+                        track.Save();
 
-                //    if (track.Title.IndexOf(rightSmartQuote) > -1)
-                //    {
-                //        track.Title = track.Title.Replace(rightSmartQuote, rightStraightQuote);
-                //        metadataChanged = true;
-                //    }
+                        results.Add(file.FullName);
+                        correctedFileCount++;
+                    }
+                }
 
-                //    if (track.Artist.IndexOf(rightSmartQuote) > -1)
-                //    {
-                //        track.Artist = track.Artist.Replace(rightSmartQuote, rightStraightQuote);
-                //        metadataChanged = true;
-                //    }
-
-                //    if (track.Album.IndexOf(rightSmartQuote) > -1)
-                //    {
-                //        track.Album = track.Album.Replace(rightSmartQuote, rightStraightQuote);
-                //        metadataChanged = true;
-                //    }
-
-                //    if (track.AlbumArtist.IndexOf(rightSmartQuote) > -1)
-                //    {
-                //        track.AlbumArtist = track.AlbumArtist.Replace(rightSmartQuote, rightStraightQuote);
-                //        metadataChanged = true;
-                //    }
-
-                //    if (metadataChanged)
-                //    {
-                //        track.Save();
-                //    }
-
-                //    if (fileRenamed || metadataChanged)
-                //    {
-                //        results.Add(file.FullName);
-                //        correctedFileCount++;
-                //    }
-
-                //    fileRenamed = false;
-                //    metadataChanged = false;
-                //}
-
-                //Utils.ProcessResults(files, results, outputFileArg);
+                Utils.ProcessResults(files, results, outputFileArg);
             }
             catch (Exception ex)
             {
