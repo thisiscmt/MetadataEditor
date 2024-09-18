@@ -2,7 +2,7 @@
   "profiles": {
     "MetadataEditor": {
       "commandName": "Project",
-      "commandLineArgs": "-d \"C:\\Temp\\Test music files\\MP3\" mp3 \"C:\\Temp\\test.txt\""
+      "commandLineArgs": "-p \"C:\\Temp\\Test music files\\MP3\" mp3"
     }
   }
 }
