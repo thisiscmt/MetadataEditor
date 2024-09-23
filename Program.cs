@@ -1,4 +1,6 @@
-﻿using MetadataEditor;
+﻿using System.Text;
+
+using MetadataEditor;
 
 if (args.Length == 0)
 {
@@ -8,7 +10,9 @@ if (args.Length == 0)
     return;
 }
 
-switch(args[0])
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+switch (args[0])
 {
     case "-casing":
     case "-c":

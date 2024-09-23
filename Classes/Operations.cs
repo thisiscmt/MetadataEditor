@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace MetadataEditor
@@ -531,7 +532,9 @@ namespace MetadataEditor
 
             string playlistFilePath = Path.Combine(dir.FullName, $"{dir.Name}.m3u");
 
-            using TextWriter playlistFile = File.CreateText(playlistFilePath);
+            // Windows-1252 encoding is used here so the files can be properly used in Winamp.
+            using StreamWriter playlistFile = new StreamWriter(playlistFilePath, true, Encoding.GetEncoding(1252));
+
             playlistFile.WriteLine("#EXTM3U");
 
             foreach (FileInfo file in files)
