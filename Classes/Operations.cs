@@ -537,7 +537,7 @@ namespace MetadataEditor
             foreach (FileInfo file in files)
             {
                 Track track = new Track(file.FullName);
-                string infEntry = $"#EXTINF:{track.Duration},{Path.GetFileNameWithoutExtension(file.Name)}";
+                string infEntry = $"#EXTINF:{track.Duration},{track.Artist} - {track.Title}";
 
                 playlistFile.WriteLine(infEntry);
                 playlistFile.WriteLine(file.Name);
