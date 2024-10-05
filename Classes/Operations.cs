@@ -1,4 +1,5 @@
 ﻿using ATL;
+using MetadataEditor.Classes;
 using System;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
@@ -359,6 +360,84 @@ namespace MetadataEditor
             }
         }
 
+        public static void RunMasterPlaylistGeneration(string[] args)
+        {
+            if (args.Length < 3)
+            {
+                Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
+                return;
+            }
+
+            try
+            {
+                string baseDirPath = args[1];
+                string extension = args[2];
+                string fullExtension = $"*.{extension}";
+                int playlistCount = 0;
+
+                string[] exclusions = ["Archive", "Ben Folds", "Cocteau Twins", "David Bowie", "Howard Jones", "Joe Jackson", "John Stewart", 
+                    "Kitchens of Distinction", "LTJ Bukem", "Lush", "Neil Finn", "Orbital", "Peter Gabriel", "Split Enz", "Squeeze", "Sting", "The Cure",
+                    "They Might Be Giants", "XTC"];
+
+                var baseDir = new DirectoryInfo(baseDirPath);
+                var artistDirs = baseDir.EnumerateDirectories();
+
+                foreach (DirectoryInfo artistDir in artistDirs)
+                {
+                    if (!exclusions.Contains(artistDir.Name))
+                    {
+                        var albumDirs = artistDir.EnumerateDirectories();
+
+                        if (albumDirs.Any())
+                        {
+                            List<AlbumDirectory> albumsByYear = new List<AlbumDirectory>();
+
+                            foreach (DirectoryInfo albumDir in albumDirs)
+                            {
+                                FileInfo file;
+                                var files = albumDir.EnumerateFiles($"*.{extension}").ToList();
+
+                                if (files.Any())
+                                {
+                                    file = files.First();
+                                    Track track = new Track(file.FullName);
+
+                                    if (track.Year != null)
+                                    {
+                                        albumsByYear.Add(new AlbumDirectory(albumDir, artistDir.Name, track.Year.Value.ToString()));
+                                    }
+                                }
+                            }
+
+                            if (albumsByYear.Any())
+                            {
+                                albumsByYear = albumsByYear.OrderBy(x => x.Year).ToList();
+                                string playlistFilePath = Path.Combine($"{artistDir.FullName}", $"{artistDir.Name}.m3u");
+
+                                foreach (AlbumDirectory album in albumsByYear)
+                                {
+                                    if (album == albumsByYear.First())
+                                    {
+                                        BuildPlaylist(album.Directory, fullExtension, playlistFilePath, false, false, ref playlistCount);
+                                    }
+                                    else
+                                    {
+                                        BuildPlaylist(album.Directory, fullExtension, playlistFilePath, true, false, ref playlistCount);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Console.WriteLine($"\nPlaylists created: {playlistCount:N0}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+
         public static void RunSingleQuoteCheck(string[] args)
         {
             if (args.Length < 4)
@@ -452,7 +531,7 @@ namespace MetadataEditor
             }
         }
 
-        public static void RunDateMetadataFieldCheck(string[] args)
+        public static void RunDateFieldCheck(string[] args)
         {
             if (args.Length < 4)
             {
@@ -511,31 +590,37 @@ namespace MetadataEditor
                 BuildPlaylistFromDirectory(dir, fullExtension, ref playlistCount);
             }
 
-            BuildPlaylist(baseDir, fullExtension, ref playlistCount);
+            string playlistFilePath = Path.Combine(baseDir.FullName, $"{baseDir.Name}.m3u");
+            BuildPlaylist(baseDir, fullExtension, playlistFilePath, false, true, ref playlistCount);
         }
 
-        private static void BuildPlaylist(DirectoryInfo dir, string fullExtension, ref int playlistCount)
+        private static void BuildPlaylist(DirectoryInfo dir, string fullExtension, string playlistFilePath, bool append, bool checkForExistingPlaylist, 
+                                          ref int playlistCount)
         {
-            var playlistFiles = dir.EnumerateFiles("*.m3u");
-
-            if (playlistFiles.Count() > 0)
+            if (checkForExistingPlaylist)
             {
-                return;
+                var playlistFiles = dir.EnumerateFiles("*.m3u");
+
+                if (playlistFiles.Any())
+                {
+                    return;
+                }
             }
 
             var files = dir.EnumerateFiles(fullExtension).OrderBy(x => new Track(x.FullName).TrackNumber);
 
-            if (files.Count() == 0)
+            if (!files.Any())
             {
                 return;
             }
 
-            string playlistFilePath = Path.Combine(dir.FullName, $"{dir.Name}.m3u");
+            // Windows-1252 encoding is used here so the files work properly in Winamp.
+            using StreamWriter playlistFile = new StreamWriter(playlistFilePath, append, Encoding.GetEncoding(1252));
 
-            // Windows-1252 encoding is used here so the files can be properly used in Winamp.
-            using StreamWriter playlistFile = new StreamWriter(playlistFilePath, true, Encoding.GetEncoding(1252));
-
-            playlistFile.WriteLine("#EXTM3U");
+            if (!append)
+            {
+                playlistFile.WriteLine("#EXTM3U");
+            }
 
             foreach (FileInfo file in files)
             {
@@ -543,10 +628,23 @@ namespace MetadataEditor
                 string infEntry = $"#EXTINF:{track.Duration},{track.Artist} - {track.Title}";
 
                 playlistFile.WriteLine(infEntry);
-                playlistFile.WriteLine(file.Name);
+
+                // If we aren't doing a check for an existing playlist then we assume a master playlist is being created, and so the file location entry
+                // needs to be prefixed with the name of the album directory.
+                if (checkForExistingPlaylist)
+                {
+                    playlistFile.WriteLine(file.Name);
+                }
+                else
+                {
+                    playlistFile.WriteLine($"{dir.Name}\\{file.Name}");
+                }
             }
 
-            playlistCount++;
+            if (!append)
+            {
+                playlistCount++;
+            }
         }
         #endregion
     }

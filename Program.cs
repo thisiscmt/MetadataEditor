@@ -39,6 +39,11 @@ switch (args[0])
         Operations.RunPlaylistGeneration(args);
 
         break;
+    case "-masterplaylist":
+    case "-mp":
+        Operations.RunMasterPlaylistGeneration(args);
+
+        break;
     case "-singlequote":
     case "-sq":
         Operations.RunSingleQuoteCheck(args);
@@ -46,7 +51,7 @@ switch (args[0])
         break;
     case "-date":
     case "-d":
-        Operations.RunDateMetadataFieldCheck(args);
+        Operations.RunDateFieldCheck(args);
 
         break;
     case "-help":
@@ -69,6 +74,9 @@ switch (args[0])
         Console.WriteLine();
         Console.WriteLine("Generate playlists in all sub-directories in a parent directory based on track number.");
         Console.WriteLine("  -p [path to directory] [extension]");
+        Console.WriteLine();
+        Console.WriteLine("Generate a master playlist containing tracks from all albums from each artist sub-directory in a parent directory.");
+        Console.WriteLine("  -mp [path to directory] [extension]");
         Console.WriteLine();
         Console.WriteLine("Check for smart right quote characters and replace them with straight quote characters.");
         Console.WriteLine("  -sq [path to directory] [extension] [path to output file (optional)]");
