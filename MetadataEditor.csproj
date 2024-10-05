@@ -13,4 +13,10 @@
     <PackageReference Include="z440.atl.core" Version="5.25.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Artist exclusions.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -11,6 +11,7 @@ namespace MetadataEditor
     internal class Operations
     {
         private const string DEFAULT_RESULTS_FILE = "Metadata Editor results.txt";
+        private const string ARTIST_EXCLUSIONS_FILE = "Artist exclusions.txt";
 
         #region Public static methods
         public static void RunCasingCheck(string[] args)
@@ -374,17 +375,20 @@ namespace MetadataEditor
                 string extension = args[2];
                 string fullExtension = $"*.{extension}";
                 int playlistCount = 0;
-
-                string[] exclusions = ["Archive", "Ben Folds", "Cocteau Twins", "David Bowie", "Howard Jones", "Joe Jackson", "John Stewart", 
-                    "Kitchens of Distinction", "LTJ Bukem", "Lush", "Neil Finn", "Orbital", "Peter Gabriel", "Split Enz", "Squeeze", "Sting", "The Cure",
-                    "They Might Be Giants", "XTC"];
-
+                string[] artistExclusions = [];
+                string? currentAssemblyDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                 var baseDir = new DirectoryInfo(baseDirPath);
                 var artistDirs = baseDir.EnumerateDirectories();
 
+                if (File.Exists(Path.Combine(currentAssemblyDir!, ARTIST_EXCLUSIONS_FILE)))
+                {
+                    string exclusionsFileContent = File.ReadAllText(ARTIST_EXCLUSIONS_FILE);
+                    artistExclusions = exclusionsFileContent.Split(',', StringSplitOptions.TrimEntries);
+                }
+
                 foreach (DirectoryInfo artistDir in artistDirs)
                 {
-                    if (!exclusions.Contains(artistDir.Name))
+                    if (!artistExclusions.Contains(artistDir.Name))
                     {
                         var albumDirs = artistDir.EnumerateDirectories();
 
