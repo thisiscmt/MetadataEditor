@@ -1,10 +1,6 @@
-﻿using ATL;
+﻿using System.Collections.Immutable;
+using ATL;
 using MetadataEditor.Classes;
-using System;
-using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace MetadataEditor
 {
@@ -351,7 +347,7 @@ namespace MetadataEditor
                 int playlistCount = 0;
 
                 DirectoryInfo baseDir = new DirectoryInfo(baseDirPath);
-                BuildPlaylistFromDirectory(baseDir, fullExtension, ref playlistCount);
+                Utils.BuildPlaylistFromDirectory(baseDir, fullExtension, ref playlistCount);
 
                 Console.WriteLine($"\nPlaylists created: {playlistCount:N0}");
             }
@@ -422,11 +418,11 @@ namespace MetadataEditor
                                 {
                                     if (album == albumsByYear.First())
                                     {
-                                        BuildPlaylist(album.Directory, fullExtension, playlistFilePath, false, false, ref playlistCount);
+                                        Utils.BuildPlaylist(album.Directory, fullExtension, playlistFilePath, false, false, ref playlistCount);
                                     }
                                     else
                                     {
-                                        BuildPlaylist(album.Directory, fullExtension, playlistFilePath, true, false, ref playlistCount);
+                                        Utils.BuildPlaylist(album.Directory, fullExtension, playlistFilePath, true, false, ref playlistCount);
                                     }
                                 }
                             }
@@ -442,7 +438,7 @@ namespace MetadataEditor
             }
         }
 
-        public static void RunSingleQuoteCheck(string[] args)
+        public static void RunQuoteCheck(string[] args)
         {
             if (args.Length < 4)
             {
@@ -470,14 +466,24 @@ namespace MetadataEditor
                 Track track;
                 string fileName;
                 char rightSmartQuote = '\u2019';
-                char rightStraightQuote = '\'';
+                char rightSmartDoubleQuote = '\u201D';
+                char leftSmartDoubleQuote = '\u201C';
+                char rightDoublePrimeQuote = '\u2033';
+                char straightQuote = '\'';
+                char straightDoubleQuote = '"';
                 var files = dir.EnumerateFiles($"*.{extension}", SearchOption.AllDirectories).ToList();
 
                 foreach (FileInfo file in files)
                 {
                     if (file.Name.IndexOf(rightSmartQuote) > -1)
                     {
-                        fileName = file.Name.Replace(rightSmartQuote, rightStraightQuote);
+                        fileName = file.Name.Replace(rightSmartQuote, straightQuote);
+                        File.Move(file.FullName, Path.Combine(file.DirectoryName!, fileName));
+                        fileRenamed = true;
+                    }
+                    else if (file.Name.IndexOf(rightSmartQuote) > -1)
+                    {
+                        fileName = file.Name.Replace(rightSmartDoubleQuote, straightDoubleQuote);
                         File.Move(file.FullName, Path.Combine(file.DirectoryName!, fileName));
                         fileRenamed = true;
                     }
@@ -488,27 +494,58 @@ namespace MetadataEditor
 
                     track = new Track(Path.Combine(file.DirectoryName!, fileName));
 
+                    if (track.Title.IndexOf(leftSmartDoubleQuote) > -1)
+                    {
+                        track.Title = track.Title.Replace(leftSmartDoubleQuote, straightDoubleQuote);
+                        metadataChanged = true;
+                    }
+
                     if (track.Title.IndexOf(rightSmartQuote) > -1)
                     {
-                        track.Title = track.Title.Replace(rightSmartQuote, rightStraightQuote);
+                        track.Title = track.Title.Replace(rightSmartQuote, straightQuote);
+                        metadataChanged = true;
+                    }
+                    else if (track.Title.IndexOf(rightSmartDoubleQuote) > -1)
+                    {
+                        track.Title = track.Title.Replace(rightSmartDoubleQuote, straightDoubleQuote);
+                        metadataChanged = true;
+                    }
+                    else if (track.Title.IndexOf(rightDoublePrimeQuote) > -1)
+                    {
+                        track.Title = track.Title.Replace(rightDoublePrimeQuote, straightDoubleQuote);
                         metadataChanged = true;
                     }
 
                     if (track.Artist.IndexOf(rightSmartQuote) > -1)
                     {
-                        track.Artist = track.Artist.Replace(rightSmartQuote, rightStraightQuote);
+                        track.Artist = track.Artist.Replace(rightSmartQuote, straightQuote);
+                        metadataChanged = true;
+                    }
+                    else if (track.Artist.IndexOf(rightSmartDoubleQuote) > -1)
+                    {
+                        track.Artist = track.Artist.Replace(rightSmartDoubleQuote, straightDoubleQuote);
                         metadataChanged = true;
                     }
 
                     if (track.Album.IndexOf(rightSmartQuote) > -1)
                     {
-                        track.Album = track.Album.Replace(rightSmartQuote, rightStraightQuote);
+                        track.Album = track.Album.Replace(rightSmartQuote, straightQuote);
+                        metadataChanged = true;
+                    }
+                    else if (track.Album.IndexOf(rightSmartDoubleQuote) > -1)
+                    {
+                        track.Album = track.Album.Replace(rightSmartDoubleQuote, straightDoubleQuote);
                         metadataChanged = true;
                     }
 
                     if (track.AlbumArtist.IndexOf(rightSmartQuote) > -1)
                     {
-                        track.AlbumArtist = track.AlbumArtist.Replace(rightSmartQuote, rightStraightQuote);
+                        track.AlbumArtist = track.AlbumArtist.Replace(rightSmartQuote, straightQuote);
+                        metadataChanged = true;
+                    }
+                    else if (track.AlbumArtist.IndexOf(rightSmartDoubleQuote) > -1)
+                    {
+                        track.AlbumArtist = track.AlbumArtist.Replace(rightSmartDoubleQuote, straightDoubleQuote);
                         metadataChanged = true;
                     }
 
@@ -580,74 +617,6 @@ namespace MetadataEditor
             catch (Exception ex)
             {
                 Console.WriteLine($"Error: {ex.Message}");
-            }
-        }
-        #endregion
-
-        #region Private static methods
-        private static void BuildPlaylistFromDirectory(DirectoryInfo baseDir, string fullExtension, ref int playlistCount)
-        {
-            var dirs = baseDir.EnumerateDirectories();
-
-            foreach (DirectoryInfo dir in dirs)
-            {
-                BuildPlaylistFromDirectory(dir, fullExtension, ref playlistCount);
-            }
-
-            string playlistFilePath = Path.Combine(baseDir.FullName, $"{baseDir.Name}.m3u");
-            BuildPlaylist(baseDir, fullExtension, playlistFilePath, false, true, ref playlistCount);
-        }
-
-        private static void BuildPlaylist(DirectoryInfo dir, string fullExtension, string playlistFilePath, bool append, bool checkForExistingPlaylist, 
-                                          ref int playlistCount)
-        {
-            if (checkForExistingPlaylist)
-            {
-                var playlistFiles = dir.EnumerateFiles("*.m3u");
-
-                if (playlistFiles.Any())
-                {
-                    return;
-                }
-            }
-
-            var files = dir.EnumerateFiles(fullExtension).OrderBy(x => new Track(x.FullName).TrackNumber);
-
-            if (!files.Any())
-            {
-                return;
-            }
-
-            // Windows-1252 encoding is used here so the files work properly in Winamp.
-            using StreamWriter playlistFile = new StreamWriter(playlistFilePath, append, Encoding.GetEncoding(1252));
-
-            if (!append)
-            {
-                playlistFile.WriteLine("#EXTM3U");
-            }
-
-            foreach (FileInfo file in files)
-            {
-                Track track = new Track(file.FullName);
-                string infEntry = $"#EXTINF:{track.Duration},{track.Artist} - {track.Title}";
-
-                playlistFile.WriteLine(infEntry);
-
-                // If we aren't doing a check for an existing playlist then we assume a master playlist is being created, and so the file location entry
-                // needs to be prefixed with the name of the album directory.
-                if (checkForExistingPlaylist)
-                {
-                    playlistFile.WriteLine(file.Name);
-                }
-                else
-                {
-                    playlistFile.WriteLine($"{dir.Name}\\{file.Name}");
-                }
-            }
-
-            if (!append)
-            {
-                playlistCount++;
             }
         }
         #endregion

@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using ATL;
+using System.Text;
 
 namespace MetadataEditor
 {
@@ -13,18 +14,6 @@ namespace MetadataEditor
         #endregion
 
         #region Public static methods
-        public static string CreateOutputDirectory(string outputFileArg)
-        {
-            string outputFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), outputFileArg);
-
-            if (outputFileArg.Contains(Path.DirectorySeparatorChar))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(outputFileArg)!);
-                outputFilePath = outputFileArg;
-            }
-
-            return outputFilePath;
-        }
 
         public static void ProcessResults(List<FileInfo> files, List<string> results, string outputFileArg)
         {
@@ -49,16 +38,6 @@ namespace MetadataEditor
             }
 
             Console.WriteLine($"\nFile \"{outputFilePath}\" created successfully. Files checked: {formattedFilesChecked}. Results found: {results.Count:N0}");
-        }
-
-        public static void WriteOutput(string outputFilePath, List<string> results)
-        {
-            using TextWriter outputFile = File.CreateText(outputFilePath);
-
-            foreach (string result in results)
-            {
-                outputFile.WriteLine(result);
-            }
         }
 
         public static string? CheckCasing(string valueToCheck, string fileName, string dirPath)
@@ -98,9 +77,88 @@ namespace MetadataEditor
 
             return resultToAdd;
         }
+
+        public static void BuildPlaylistFromDirectory(DirectoryInfo baseDir, string fullExtension, ref int playlistCount)
+        {
+            var dirs = baseDir.EnumerateDirectories();
+
+            foreach (DirectoryInfo dir in dirs)
+            {
+                BuildPlaylistFromDirectory(dir, fullExtension, ref playlistCount);
+            }
+
+            string playlistFilePath = Path.Combine(baseDir.FullName, $"{baseDir.Name}.m3u");
+            BuildPlaylist(baseDir, fullExtension, playlistFilePath, false, true, ref playlistCount);
+        }
+
+        public static void BuildPlaylist(DirectoryInfo dir, string fullExtension, string playlistFilePath, bool append, bool checkForExistingPlaylist,
+                                          ref int playlistCount)
+        {
+            if (checkForExistingPlaylist)
+            {
+                var playlistFiles = dir.EnumerateFiles("*.m3u");
+
+                if (playlistFiles.Any())
+                {
+                    return;
+                }
+            }
+
+            var files = dir.EnumerateFiles(fullExtension).OrderBy(x => new Track(x.FullName).TrackNumber);
+
+            if (!files.Any())
+            {
+                return;
+            }
+
+            // Windows-1252 encoding is used here so the files work properly in Winamp.
+            using StreamWriter playlistFile = new StreamWriter(playlistFilePath, append, Encoding.GetEncoding(1252));
+
+            if (!append)
+            {
+                playlistFile.WriteLine("#EXTM3U");
+            }
+
+            foreach (FileInfo file in files)
+            {
+                Track track = new Track(file.FullName);
+                string infEntry = $"#EXTINF:{track.Duration},{track.Artist} - {track.Title}";
+
+                playlistFile.WriteLine(infEntry);
+
+                // If we aren't doing a check for an existing playlist then we assume a master playlist is being created, and so the file location entry
+                // needs to be prefixed with the name of the album directory.
+                if (checkForExistingPlaylist)
+                {
+                    playlistFile.WriteLine(file.Name);
+                }
+                else
+                {
+                    playlistFile.WriteLine($"{dir.Name}\\{file.Name}");
+                }
+            }
+
+            if (!append)
+            {
+                playlistCount++;
+            }
+        }
         #endregion
 
         #region Private static methods
+        public static string CreateOutputDirectory(string outputFileArg)
+        {
+            string outputFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), outputFileArg);
+
+            if (outputFileArg.Contains(Path.DirectorySeparatorChar))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(outputFileArg)!);
+                outputFilePath = outputFileArg;
+            }
+
+            return outputFilePath;
+        }
+
         private static bool ContainsWord(string source, string word)
         {
             bool artistPartMatch;
