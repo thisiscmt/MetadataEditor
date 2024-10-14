@@ -438,7 +438,7 @@ namespace MetadataEditor
             }
         }
 
-        public static void RunQuoteCheck(string[] args)
+        public static void RunSpecialCharacterCheck(string[] args)
         {
             if (args.Length < 4)
             {
@@ -452,10 +452,7 @@ namespace MetadataEditor
                 string extension = args[2];
                 string fullExtension = $"*.{extension}";
                 string outputFileArg = DEFAULT_RESULTS_FILE;
-                bool fileRenamed = false;
-                bool metadataChanged = false;
                 var results = new List<string>();
-                int correctedFileCount = 0;
 
                 if (args.Length == 4)
                 {
@@ -464,104 +461,34 @@ namespace MetadataEditor
 
                 DirectoryInfo dir = new DirectoryInfo(baseDirPath);
                 Track track;
-                string fileName;
-                char rightSmartQuote = '\u2019';
-                char rightSmartDoubleQuote = '\u201D';
-                char leftSmartDoubleQuote = '\u201C';
-                char rightDoublePrimeQuote = '\u2033';
-                char straightQuote = '\'';
-                char straightDoubleQuote = '"';
+                string specialCharFound;
                 var files = dir.EnumerateFiles($"*.{extension}", SearchOption.AllDirectories).ToList();
 
                 foreach (FileInfo file in files)
                 {
-                    if (file.Name.IndexOf(rightSmartQuote) > -1)
+                    specialCharFound = Utils.CheckForSpecialCharacter(file.Name);
+
+                    if (specialCharFound != "")
                     {
-                        fileName = file.Name.Replace(rightSmartQuote, straightQuote);
-                        File.Move(file.FullName, Path.Combine(file.DirectoryName!, fileName));
-                        fileRenamed = true;
-                    }
-                    else if (file.Name.IndexOf(rightSmartQuote) > -1)
-                    {
-                        fileName = file.Name.Replace(rightSmartDoubleQuote, straightDoubleQuote);
-                        File.Move(file.FullName, Path.Combine(file.DirectoryName!, fileName));
-                        fileRenamed = true;
-                    }
-                    else
-                    {
-                        fileName = file.Name;
+                        results.Add($"{file.FullName} | {specialCharFound}");
+                        continue;
                     }
 
-                    track = new Track(Path.Combine(file.DirectoryName!, fileName));
+                    track = new Track(Path.Combine(file.DirectoryName!, file.FullName));
+                    specialCharFound = Utils.CheckForSpecialCharacter(track.Title);
 
-                    if (track.Title.IndexOf(leftSmartDoubleQuote) > -1)
+                    if (specialCharFound != "")
                     {
-                        track.Title = track.Title.Replace(leftSmartDoubleQuote, straightDoubleQuote);
-                        metadataChanged = true;
-                    }
-
-                    if (track.Title.IndexOf(rightSmartQuote) > -1)
-                    {
-                        track.Title = track.Title.Replace(rightSmartQuote, straightQuote);
-                        metadataChanged = true;
-                    }
-                    else if (track.Title.IndexOf(rightSmartDoubleQuote) > -1)
-                    {
-                        track.Title = track.Title.Replace(rightSmartDoubleQuote, straightDoubleQuote);
-                        metadataChanged = true;
-                    }
-                    else if (track.Title.IndexOf(rightDoublePrimeQuote) > -1)
-                    {
-                        track.Title = track.Title.Replace(rightDoublePrimeQuote, straightDoubleQuote);
-                        metadataChanged = true;
+                        results.Add($"{file.FullName} | Title | {specialCharFound}");
+                        continue;
                     }
 
-                    if (track.Artist.IndexOf(rightSmartQuote) > -1)
-                    {
-                        track.Artist = track.Artist.Replace(rightSmartQuote, straightQuote);
-                        metadataChanged = true;
-                    }
-                    else if (track.Artist.IndexOf(rightSmartDoubleQuote) > -1)
-                    {
-                        track.Artist = track.Artist.Replace(rightSmartDoubleQuote, straightDoubleQuote);
-                        metadataChanged = true;
-                    }
+                    specialCharFound = Utils.CheckForSpecialCharacter(track.Album);
 
-                    if (track.Album.IndexOf(rightSmartQuote) > -1)
+                    if (specialCharFound != "")
                     {
-                        track.Album = track.Album.Replace(rightSmartQuote, straightQuote);
-                        metadataChanged = true;
+                        results.Add($"{file.FullName} | Album | {specialCharFound}");
                     }
-                    else if (track.Album.IndexOf(rightSmartDoubleQuote) > -1)
-                    {
-                        track.Album = track.Album.Replace(rightSmartDoubleQuote, straightDoubleQuote);
-                        metadataChanged = true;
-                    }
-
-                    if (track.AlbumArtist.IndexOf(rightSmartQuote) > -1)
-                    {
-                        track.AlbumArtist = track.AlbumArtist.Replace(rightSmartQuote, straightQuote);
-                        metadataChanged = true;
-                    }
-                    else if (track.AlbumArtist.IndexOf(rightSmartDoubleQuote) > -1)
-                    {
-                        track.AlbumArtist = track.AlbumArtist.Replace(rightSmartDoubleQuote, straightDoubleQuote);
-                        metadataChanged = true;
-                    }
-
-                    if (metadataChanged)
-                    {
-                        track.Save();
-                    }
-
-                    if (fileRenamed || metadataChanged)
-                    {
-                        results.Add(file.FullName);
-                        correctedFileCount++;
-                    }
-
-                    fileRenamed = false;
-                    metadataChanged = false;
                 }
 
                 Utils.ProcessResults(files, results, outputFileArg);

@@ -11,6 +11,16 @@ namespace MetadataEditor
         private const string CUSTOM_CASE_1 = "OK Alright A Huh Oh Yeah";
 
         private static string[] m_lowerCaseWords = ["A", "And", "As", "At", "For", "In", "Of", "On", "Or", "The", "To"];
+
+        private static Dictionary<char, string> m_specialChars = new Dictionary<char, string>
+        {
+            { '\u2018', "Left single quote" },
+            { '\u2019', "Right single quote" },
+            { '\u201C', "Left double quote" },
+            { '\u201D', "Right double quote" },
+            { '\u2033', "Double prime" },
+            { '\u2010', "Hyphen" }
+        };
         #endregion
 
         #region Public static methods
@@ -78,6 +88,18 @@ namespace MetadataEditor
             return resultToAdd;
         }
 
+        public static string CheckForSpecialCharacter(string value)
+        {
+            foreach(char specialChar in m_specialChars.Keys)
+            {
+                if (value.Contains(specialChar))
+                {
+                    return m_specialChars[specialChar];
+                }
+            }
+
+            return "";
+        }
         public static void BuildPlaylistFromDirectory(DirectoryInfo baseDir, string fullExtension, ref int playlistCount)
         {
             var dirs = baseDir.EnumerateDirectories();

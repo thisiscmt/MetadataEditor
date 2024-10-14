@@ -44,9 +44,9 @@ switch (args[0])
         Operations.RunMasterPlaylistGeneration(args);
 
         break;
-    case "-quote":
-    case "-q":
-        Operations.RunQuoteCheck(args);
+    case "-specialcharacter":
+    case "-sc":
+        Operations.RunSpecialCharacterCheck(args);
 
         break;
     case "-date":
@@ -78,8 +78,8 @@ switch (args[0])
         Console.WriteLine("Generate a master playlist containing tracks from all albums from each artist sub-directory in a parent directory.");
         Console.WriteLine("  -mp [path to directory] [extension]");
         Console.WriteLine();
-        Console.WriteLine("Check for smart right single and double quote characters and replace them with straight quote characters.");
-        Console.WriteLine("  -q [path to directory] [extension] [path to output file (optional)]");
+        Console.WriteLine("Check for special characters in file names and metadata, such as smart single and double quotes and a hyphen.");
+        Console.WriteLine("  -sc [path to directory] [extension] [path to output file (optional)]");
         Console.WriteLine();
         Console.WriteLine("Convert the Date metadata field from a 3-part date value to a 4-digit year value, if present.");
         Console.WriteLine("  -d [path to directory] [extension] [path to output file (optional)]");
