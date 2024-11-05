@@ -243,6 +243,14 @@ namespace MetadataEditor
                             }
 
                             break;
+                        case "lyrics":
+                            if ((checkToPerform == "empty" && track.Lyrics.SynchronizedLyrics.Count == 0 && track.Lyrics.UnsynchronizedLyrics.Trim() == "") || 
+                                (checkToPerform == "nonempty" && (track.Lyrics.SynchronizedLyrics.Count > 0 || track.Lyrics.UnsynchronizedLyrics.Trim() != "")))
+                            {
+                                results.Add($"{file.FullName} | Lyrics");
+                            }
+
+                            break;
                     }
                 }
 
