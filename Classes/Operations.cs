@@ -177,6 +177,7 @@ namespace MetadataEditor
                 string fieldName = args[3].ToLower();
                 string checkToPerform = args[4];
                 string outputFileArg = DEFAULT_RESULTS_FILE;
+                Track track;
                 var results = new List<string>();
 
                 if (args.Length == 6)
@@ -189,7 +190,7 @@ namespace MetadataEditor
 
                 foreach (FileInfo file in files)
                 {
-                    Track track = new Track(Path.Combine(file.DirectoryName!, file.Name));
+                    track = new Track(Path.Combine(file.DirectoryName!, file.Name));
 
                     switch (fieldName)
                     {
@@ -239,7 +240,7 @@ namespace MetadataEditor
                         case "genre":
                             if ((checkToPerform == "empty" && track.Genre == "") || (checkToPerform == "nonempty" && track.Genre != ""))
                             {
-                                results.Add($"{file.FullName} | {track.Genre}");
+                                results.Add(file.FullName);
                             }
 
                             break;
@@ -247,7 +248,14 @@ namespace MetadataEditor
                             if ((checkToPerform == "empty" && track.Lyrics.SynchronizedLyrics.Count == 0 && track.Lyrics.UnsynchronizedLyrics.Trim() == "") || 
                                 (checkToPerform == "nonempty" && (track.Lyrics.SynchronizedLyrics.Count > 0 || track.Lyrics.UnsynchronizedLyrics.Trim() != "")))
                             {
-                                results.Add($"{file.FullName} | Lyrics");
+                                results.Add(file.FullName);
+                            }
+
+                            break;
+                        case "artwork":
+                            if ((checkToPerform == "empty" && track.EmbeddedPictures.Count == 0) || (checkToPerform == "nonempty" && track.EmbeddedPictures.Count > 0))
+                            {
+                                results.Add(file.FullName);
                             }
 
                             break;
