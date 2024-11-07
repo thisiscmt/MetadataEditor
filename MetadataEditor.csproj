@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
-    <PackageReference Include="z440.atl.core" Version="5.25.0" />
+    <PackageReference Include="z440.atl.core" Version="6.7.0" />
   </ItemGroup>
 
   <ItemGroup>
