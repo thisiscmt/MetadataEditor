@@ -86,6 +86,83 @@ namespace MetadataEditor
             }
         }
 
+        public static void RunCasingParensCheck(string[] args)
+        {
+            if (args.Length < 3)
+            {
+                Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
+                return;
+            }
+
+            try
+            {
+                string baseDirPath = args[1];
+                string extension = args[2];
+                string outputFileArg = DEFAULT_RESULTS_FILE;
+                string? result;
+                var results = new List<string>();
+
+                if (args.Length == 4)
+                {
+                    outputFileArg = args[3];
+                }
+
+                DirectoryInfo dir = new DirectoryInfo(baseDirPath);
+                var files = dir.EnumerateFiles($"*.{extension}", SearchOption.AllDirectories).ToList();
+
+                foreach (FileInfo file in files)
+                {
+                    result = Utils.CheckForLowerCaseAfterParen(file.Name, file.Name, file.DirectoryName!);
+
+                    if (result != null)
+                    {
+                        results.Add(result);
+                        continue;
+                    }
+
+                    Track track = new Track(Path.Combine(file.DirectoryName!, file.Name));
+
+                    result = Utils.CheckForLowerCaseAfterParen(track.Artist, file.Name, file.DirectoryName!);
+
+                    if (result != null)
+                    {
+                        results.Add($"{result} | {track.Artist}");
+                        continue;
+                    }
+
+                    result = Utils.CheckForLowerCaseAfterParen(track.Title, file.Name, file.DirectoryName!);
+
+                    if (result != null)
+                    {
+                        results.Add($"{result} | {track.Title}");
+                        continue;
+                    }
+
+                    result = Utils.CheckForLowerCaseAfterParen(track.Album, file.Name, file.DirectoryName!);
+
+                    if (result != null)
+                    {
+                        results.Add($"{result} | {track.Album}");
+                        continue;
+                    }
+
+                    result = Utils.CheckForLowerCaseAfterParen(track.AlbumArtist, file.Name, file.DirectoryName!);
+
+                    if (result != null)
+                    {
+                        results.Add($"{result} | {track.AlbumArtist}");
+                        continue;
+                    }
+                }
+
+                Utils.ProcessResults(files, results, outputFileArg);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+
         public static void RunSearch(string[] args)
         {
             if (args.Length < 4)
@@ -270,9 +347,9 @@ namespace MetadataEditor
             }
         }
 
-        public static void RunParensCheck(string[] args)
+        public static void RunSpecialCharacterCheck(string[] args)
         {
-            if (args.Length < 3)
+            if (args.Length < 4)
             {
                 Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
                 return;
@@ -282,8 +359,8 @@ namespace MetadataEditor
             {
                 string baseDirPath = args[1];
                 string extension = args[2];
+                string fullExtension = $"*.{extension}";
                 string outputFileArg = DEFAULT_RESULTS_FILE;
-                string? result;
                 var results = new List<string>();
 
                 if (args.Length == 4)
@@ -292,50 +369,34 @@ namespace MetadataEditor
                 }
 
                 DirectoryInfo dir = new DirectoryInfo(baseDirPath);
+                Track track;
+                string specialCharFound;
                 var files = dir.EnumerateFiles($"*.{extension}", SearchOption.AllDirectories).ToList();
 
                 foreach (FileInfo file in files)
                 {
-                    result = Utils.CheckForLowerCaseAfterParen(file.Name, file.Name, file.DirectoryName!);
+                    specialCharFound = Utils.CheckForSpecialCharacter(file.Name);
 
-                    if (result != null)
+                    if (specialCharFound != "")
                     {
-                        results.Add(result);
+                        results.Add($"{file.FullName} | {specialCharFound}");
                         continue;
                     }
 
-                    Track track = new Track(Path.Combine(file.DirectoryName!, file.Name));
+                    track = new Track(Path.Combine(file.DirectoryName!, file.FullName));
+                    specialCharFound = Utils.CheckForSpecialCharacter(track.Title);
 
-                    result = Utils.CheckForLowerCaseAfterParen(track.Artist, file.Name, file.DirectoryName!);
-
-                    if (result != null)
+                    if (specialCharFound != "")
                     {
-                        results.Add($"{result} | {track.Artist}");
+                        results.Add($"{file.FullName} | Title | {specialCharFound}");
                         continue;
                     }
 
-                    result = Utils.CheckForLowerCaseAfterParen(track.Title, file.Name, file.DirectoryName!);
+                    specialCharFound = Utils.CheckForSpecialCharacter(track.Album);
 
-                    if (result != null)
+                    if (specialCharFound != "")
                     {
-                        results.Add($"{result} | {track.Title}");
-                        continue;
-                    }
-
-                    result = Utils.CheckForLowerCaseAfterParen(track.Album, file.Name, file.DirectoryName!);
-
-                    if (result != null)
-                    {
-                        results.Add($"{result} | {track.Album}");
-                        continue;
-                    }
-
-                    result = Utils.CheckForLowerCaseAfterParen(track.AlbumArtist, file.Name, file.DirectoryName!);
-
-                    if (result != null)
-                    {
-                        results.Add($"{result} | {track.AlbumArtist}");
-                        continue;
+                        results.Add($"{file.FullName} | Album | {specialCharFound}");
                     }
                 }
 
@@ -447,67 +508,6 @@ namespace MetadataEditor
                 }
 
                 Console.WriteLine($"\nPlaylists created: {playlistCount:N0}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-            }
-        }
-
-        public static void RunSpecialCharacterCheck(string[] args)
-        {
-            if (args.Length < 4)
-            {
-                Console.WriteLine("Missing required parameter. Run 'medit -help' for more information.");
-                return;
-            }
-
-            try
-            {
-                string baseDirPath = args[1];
-                string extension = args[2];
-                string fullExtension = $"*.{extension}";
-                string outputFileArg = DEFAULT_RESULTS_FILE;
-                var results = new List<string>();
-
-                if (args.Length == 4)
-                {
-                    outputFileArg = args[3];
-                }
-
-                DirectoryInfo dir = new DirectoryInfo(baseDirPath);
-                Track track;
-                string specialCharFound;
-                var files = dir.EnumerateFiles($"*.{extension}", SearchOption.AllDirectories).ToList();
-
-                foreach (FileInfo file in files)
-                {
-                    specialCharFound = Utils.CheckForSpecialCharacter(file.Name);
-
-                    if (specialCharFound != "")
-                    {
-                        results.Add($"{file.FullName} | {specialCharFound}");
-                        continue;
-                    }
-
-                    track = new Track(Path.Combine(file.DirectoryName!, file.FullName));
-                    specialCharFound = Utils.CheckForSpecialCharacter(track.Title);
-
-                    if (specialCharFound != "")
-                    {
-                        results.Add($"{file.FullName} | Title | {specialCharFound}");
-                        continue;
-                    }
-
-                    specialCharFound = Utils.CheckForSpecialCharacter(track.Album);
-
-                    if (specialCharFound != "")
-                    {
-                        results.Add($"{file.FullName} | Album | {specialCharFound}");
-                    }
-                }
-
-                Utils.ProcessResults(files, results, outputFileArg);
             }
             catch (Exception ex)
             {
