@@ -78,7 +78,7 @@ namespace MetadataEditor
                     }
                 }
 
-                Utils.ProcessResults(files, results, outputFileArg);
+                Utils.ProcessResults(files.Count, results, outputFileArg);
             }
             catch (Exception ex)
             {
@@ -155,7 +155,7 @@ namespace MetadataEditor
                     }
                 }
 
-                Utils.ProcessResults(files, results, outputFileArg);
+                Utils.ProcessResults(files.Count, results, outputFileArg);
             }
             catch (Exception ex)
             {
@@ -231,7 +231,7 @@ namespace MetadataEditor
                     }
                 }
 
-                Utils.ProcessResults(files, results, outputFileArg);
+                Utils.ProcessResults(files.Count, results, outputFileArg);
             }
             catch (Exception ex)
             {
@@ -339,7 +339,7 @@ namespace MetadataEditor
                     }
                 }
 
-                Utils.ProcessResults(files, results, outputFileArg);
+                Utils.ProcessResults(files.Count, results, outputFileArg);
             }
             catch (Exception ex)
             {
@@ -368,12 +368,13 @@ namespace MetadataEditor
                     outputFileArg = args[3];
                 }
 
-                DirectoryInfo dir = new DirectoryInfo(baseDirPath);
+                DirectoryInfo baseDir = new DirectoryInfo(baseDirPath);
                 Track track;
                 string specialCharFound;
-                var files = dir.EnumerateFiles($"*.{extension}", SearchOption.AllDirectories).ToList();
 
-                foreach (FileInfo file in files)
+                var musicFiles = baseDir.EnumerateFiles($"*.{extension}", SearchOption.AllDirectories).ToList();
+
+                foreach (FileInfo file in musicFiles)
                 {
                     specialCharFound = Utils.CheckForSpecialCharacter(file.Name);
 
@@ -400,7 +401,31 @@ namespace MetadataEditor
                     }
                 }
 
-                Utils.ProcessResults(files, results, outputFileArg);
+                var playlistFiles = baseDir.EnumerateFiles($"*.m3u", SearchOption.AllDirectories).ToList();
+
+                foreach (FileInfo file in playlistFiles)
+                {
+                    specialCharFound = Utils.CheckForSpecialCharacter(file.Name);
+
+                    if (specialCharFound != "")
+                    {
+                        results.Add($"{file.FullName} | {specialCharFound}");
+                    }
+                }
+
+                var dirs = baseDir.EnumerateDirectories("*.*", SearchOption.AllDirectories).ToList();
+
+                foreach (DirectoryInfo dir in dirs)
+                {
+                    specialCharFound = Utils.CheckForSpecialCharacter(dir.Name);
+
+                    if (specialCharFound != "")
+                    {
+                        results.Add($"{dir.FullName} | {specialCharFound}");
+                    }
+                }
+
+                Utils.ProcessResults(musicFiles.Count + playlistFiles.Count + dirs.Count, results, outputFileArg);
             }
             catch (Exception ex)
             {
@@ -555,7 +580,7 @@ namespace MetadataEditor
                     }
                 }
 
-                Utils.ProcessResults(files, results, outputFileArg);
+                Utils.ProcessResults(files.Count, results, outputFileArg);
             }
             catch (Exception ex)
             {

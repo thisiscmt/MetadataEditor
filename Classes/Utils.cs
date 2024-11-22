@@ -25,13 +25,13 @@ namespace MetadataEditor
 
         #region Public static methods
 
-        public static void ProcessResults(List<FileInfo> files, List<string> results, string outputFileArg)
+        public static void ProcessResults(int fileCount, List<string> results, string outputFileArg)
         {
-            string formattedFilesChecked = files.Count.ToString("N0");
+            string formattedFilesChecked = fileCount.ToString("N0");
 
             if (results.Count == 0)
             {
-                string filesChecked = files.Count.ToString("N0");
+                string filesChecked = fileCount.ToString("N0");
                 Console.WriteLine($"\nNo errors were found. Files checked: {formattedFilesChecked}");
 
                 return;
